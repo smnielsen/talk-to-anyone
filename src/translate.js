@@ -21,8 +21,6 @@ export default (text, translateFrom, translateTo, callback) => {
         console.error('Err', err);
         return;
       }
-      console.log(`Text: ${text}`);
-      console.log(`Translation: ${res.text}`, res);
       callback(res.text)
     });
 }

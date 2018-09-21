@@ -118,17 +118,15 @@ const EmojiPointer = (props) => {
 
 const msg = new SpeechSynthesisUtterance();
 const voiceschanged = () => {
-  console.log(`Voices #: ${speechSynthesis.getVoices().length}`)
-  speechSynthesis.getVoices().forEach((voice, index) => {
-    console.log(index, voice.name, voice.lang)
-  })
+  const voices = speechSynthesis.getVoices();
+  console.info(`Voices #: ${voices.length}`);
 }
 speechSynthesis.onvoiceschanged = voiceschanged
 
 const findVoice = (lang) => {
   const voices = window.speechSynthesis.getVoices();
   const voice = voices.find((voice) => voice.lang === lang) || voices[10];
-  console.log(`(${lang}) Using voice: ${voice.name} => ${voice.lang}`);
+  console.info(`# Voice (${voice.lang}): ${voice.name}`);
   return voice;
 }
 
@@ -137,6 +135,7 @@ const speak = (text, lang) => {
   msg.voiceURI = 'native';
   msg.text = text;
   msg.lang = lang;
+  console.log(`# Speaking (${lang}) - ${text}`);
   window.speechSynthesis.speak(msg);
 }
 const initialState = {
@@ -176,15 +175,12 @@ class App extends Component {
     let recognitionArray = []
 
     recognition.onstart = () => {
-      console.log('onStart');
       this.setState({
-        listening: true,
         error: null
       })
     };
 
     recognition.onend = () => {
-      console.log('onend');
       recognition.stop();
       recognitionArray = [];
 
@@ -192,15 +188,14 @@ class App extends Component {
         if (!this.state.listening) {
           return;
         }
-        console.log('state', this.state);
-        // Talk
-        speak(this.state.translated, this.state.translateTo.code)
-
         // Reset
         this.setState({
           listening: false,
           error: null
         });
+
+        // Speak it!
+        speak(this.state.translated, this.state.translateTo.code)
       }, 1000);
     };
 
@@ -263,9 +258,9 @@ class App extends Component {
     this.setState({
       ...initialState,
       listening: true
+    }, () => {
+      this.recognition.start();
     });
-
-    this.recognition.start();
   }
 
   onTranslateToChange(event) {
@@ -279,6 +274,7 @@ class App extends Component {
         code: langCode
       }
     }, () => {
+      console.log('translateFrom', this.state.translateFrom)
       console.log('translateTo', this.state.translateTo)
     })
   }
@@ -296,6 +292,7 @@ class App extends Component {
     }, () => {
       this.recognition.lang = langCode;
       console.log('translateFrom', this.state.translateFrom)
+      console.log('translateTo', this.state.translateTo)
     })
   }
 
