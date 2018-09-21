@@ -7,13 +7,18 @@ const API_KEY = 'trnsl.1.1.20180921T122306Z.830807d550981e67.84f312604e54edcb2e3
 // Instantiates a client
 const translate = new Translate(API_KEY);
 
-export default (text, targetCode, callback) => {
+export default (text, translateFrom, translateTo, callback) => {
   translate.translate(text, 
-    { to: targetCode.split('-')[0] }, 
+    { 
+      from: translateFrom.split('-')[0],
+      to: translateTo.split('-')[0]
+    },
     (err, res) => {
       if (err) {
+        console.log(`Text: ${text}`);
+        console.log(`Translation: ${res.text}`, res);
+        console.log('translateTo', translateTo);
         console.error('Err', err);
-        console('targetCode', targetCode);
         return;
       }
       console.log(`Text: ${text}`);

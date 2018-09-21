@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import { Microphone } from 'styled-icons/fa-solid/Microphone';
-
+import { SpeakerPhone } from 'styled-icons/material/SpeakerPhone';
 import './App.css';
 import styled from 'styled-components'
 import languages, { getLanguageCodes } from './languages';
 import translateText from './translate';
+
+const SpeakerPhoneSmall = styled(SpeakerPhone)`
+  width: 30px;
+  cursor: pointer;
+`
 
 const StyledButton = styled.button`
   margin: 20px auto; 
@@ -90,12 +95,15 @@ const Container = styled.section`
 
 const EmojiPointer = (props) => {
   let emoji = '';
-  switch(props.direction) {
+  switch(props.emojiType) {
     case 'down':
       emoji = '👇';
       break;
     case 'right':
       emoji = '👉';
+      break;
+    case 'mic':
+      emoji = '🎙️';
       break;
     default:
       emoji = ':'
@@ -105,31 +113,47 @@ const EmojiPointer = (props) => {
 }
 
 const msg = new SpeechSynthesisUtterance();
-const voices = window.speechSynthesis.getVoices();
+const voiceschanged = () => {
+  console.log(`Voices #: ${speechSynthesis.getVoices().length}`)
+  speechSynthesis.getVoices().forEach((voice, index) => {
+    console.log(index, voice.name, voice.lang)
+  })
+}
+speechSynthesis.onvoiceschanged = voiceschanged
+
+const findVoice = (lang) => {
+  const voices = window.speechSynthesis.getVoices();
+  const voice = voices.find((voice) => voice.lang === lang) || voices[10];
+  console.log(`(${lang}) Using voice: ${voice.name} => ${voice.lang}`);
+  return voice;
+}
+
 const speak = (text, lang) => {
-  msg.voice = voices[10]; // Note: some voices don't support altering params
+  msg.voice = findVoice(lang); // Note: some voices don't support altering params
   msg.voiceURI = 'native';
   msg.text = text;
   msg.lang = lang;
   window.speechSynthesis.speak(msg);
 }
+const initialState = {
+  speechText: '',
+  translated: '',
+  error: null,
+  listening: false,
+  fallbackEng: '',
+  fallbackSwe: '',
+  translateFrom: {
+    name: 'Svenska', // 'Pусский',
+    code: 'sv-SE' // 'ru-RU'
+  },
+  translateTo: {
+    name: 'Deutsch',
+    code: 'de-DE'
+  }
+};
 
 class App extends Component {
-  state = {
-    speechText: '',
-    translated: '',
-    fallback: '',
-    error: null,
-    listening: false,
-    translateFrom: {
-      name: 'Svenska', // 'Pусский',
-      code: 'sv-SE' // 'ru-RU'
-    },
-    translateTo: {
-      name: 'Deutsch',
-      code: 'de-DE'
-    }
-  }
+  state = initialState
 
   componentDidMount() {
     if (!('webkitSpeechRecognition' in window)) {
@@ -138,10 +162,6 @@ class App extends Component {
     }
     console.log('translateFrom', this.state.translateFrom);
     console.log('translateTo', this.state.translateTo);
-
-    voices.forEach((voice) => {
-      console.log(voice.name, voice.default ? voice.default :'');
-    });
 
     const recognition = new window.webkitSpeechRecognition();
     recognition.interimResults = true;
@@ -156,6 +176,7 @@ class App extends Component {
         error: null
       })
     };
+
     recognition.onend = () => {
       console.log('onend');
       recognition.stop();
@@ -165,6 +186,7 @@ class App extends Component {
         if (!this.state.listening) {
           return;
         }
+        console.log('state', this.state);
         // Talk
         speak(this.state.translated, this.state.translateTo.code)
 
@@ -187,33 +209,37 @@ class App extends Component {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript
       if (recognitionArray.includes(transcript.toLowerCase())) {
-        console.warn(`Exists transcript: ${transcript}`);
+        //console.warn(`Exists transcript: ${transcript}`);
         return;
       }
       recognitionArray.push(transcript.toLowerCase());
-      console.log(`transcript: ${transcript}`);
+      //console.log(`transcript: ${transcript}`);
       this.setState({
         listening: true,
         error: null,
         speechText: transcript
       }, () => {
-        translateText(this.state.speechText, this.state.translateTo.code, (translated) => {
+        const innerTranslate = (code, callback) => {
+          translateText(transcript, this.state.translateFrom.code, code, (translated) => {
+            callback(translated);
+          });
+        }
+
+        innerTranslate(this.state.translateTo.code, (translated) => {
           this.setState({
             translated
           });
-
-          translateText(this.state.speechText, 'en', (translated) => {
-            this.setState({
-              fallbackEng: translated
-            });
-
-            translateText(this.state.speechText, 'sv', (translated) => {
-              this.setState({
-                fallbackSwe: translated
-              });
-            })
-          })
-        })
+        });
+        innerTranslate('en-US', (translated) => {
+          this.setState({
+            fallbackEng: translated
+          });
+        });
+        innerTranslate('sv-SE', (translated) => {
+          this.setState({
+            fallbackSwe: translated
+          });
+        });
       })
     }
     this.recognition = recognition;
@@ -227,9 +253,12 @@ class App extends Component {
       });
       return;
     }
+
     this.setState({
+      ...initialState,
       listening: true
     });
+
     this.recognition.start();
   }
 
@@ -291,7 +320,7 @@ class App extends Component {
           {this.renderSelect("Translate to", this.state.translateTo, this.onTranslateToChange.bind(this))}
 
           <Center>
-            {this.state.translateFrom.name} <EmojiPointer direction="down" />
+            {this.state.translateFrom.name} <EmojiPointer emojiType="mic" />
             <SpeechText>{this.state.speechText || '...'}</SpeechText>
             <StyledButton onClick={() => this.onClick()}>
               { 
@@ -302,17 +331,24 @@ class App extends Component {
             </StyledButton>
           </Center>
           <Center>
-            {this.state.translateTo.name} <EmojiPointer direction="down" />
+            {this.state.translateTo.name} <EmojiPointer emojiType="down" />
             <GreenResult>{this.state.translated || '...'}</GreenResult>
+            <SpeakerPhoneSmall onClick={() => speak(this.state.translated, this.state.translateTo.code)} />
           </Center>
           <Separator />
           <Center>
-            English <EmojiPointer direction="down" />
-            <DarkGreenResult>{this.state.fallbackEng || '...'}</DarkGreenResult>
+            English <EmojiPointer emojiType="down" /> 
+            <DarkGreenResult>
+            {this.state.fallbackEng || '...'}
+            <SpeakerPhoneSmall onClick={() => speak(this.state.fallbackEng, 'en-US')} />
+            </DarkGreenResult>
           </Center>
           <Center>
-            Swedish <EmojiPointer direction="down" />
-            <DarkGreenResult>{this.state.fallbackSwe || '...'}</DarkGreenResult>
+            Swedish <EmojiPointer emojiType="down" />
+            <DarkGreenResult>
+              {this.state.fallbackSwe || '...'}
+              <SpeakerPhoneSmall onClick={() => speak(this.state.fallbackSwe, 'sv-SE')} />
+            </DarkGreenResult>
           </Center>
           <Separator />
           <Center>
