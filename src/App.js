@@ -163,6 +163,7 @@ class App extends Component {
   componentDidMount() {
     if (!('webkitSpeechRecognition' in window)) {
       console.error(`Not supporting speech recognition`);
+      alert('Device does not support "webkitSpeechRecognition"');
       return;
     }
     console.log('translateFrom', this.state.translateFrom);
@@ -201,6 +202,7 @@ class App extends Component {
 
     recognition.onerror = (event) => {
       console.log(`onerror: ${event}`);
+      alert(`"webkitSpeechRecognition" got error ${event}`);
       this.setState({
         listening: false,
         error: new Error(event)
