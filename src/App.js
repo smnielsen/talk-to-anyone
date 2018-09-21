@@ -202,7 +202,7 @@ class App extends Component {
 
     recognition.onerror = (event) => {
       console.log(`onerror: ${event}`);
-      alert(`"webkitSpeechRecognition" got error ${event}`);
+      alert(`"webkitSpeechRecognition" got error: ${event.message}`, event);
       this.setState({
         listening: false,
         error: new Error(event)
