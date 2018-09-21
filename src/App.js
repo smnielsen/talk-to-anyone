@@ -126,7 +126,9 @@ speechSynthesis.onvoiceschanged = voiceschanged
 const findVoice = (lang) => {
   const voices = window.speechSynthesis.getVoices();
   const voice = voices.find((voice) => voice.lang === lang) || voices[10];
-  console.info(`# Voice (${voice.lang}): ${voice.name}`);
+  if (voice) {
+    console.info(`# Voice (${voice.lang}): ${voice.name}`);
+  }
   return voice;
 }
 
