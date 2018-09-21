@@ -161,15 +161,16 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if (!('webkitSpeechRecognition' in window)) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
       console.error(`Not supporting speech recognition`);
-      alert('Device does not support "webkitSpeechRecognition"');
+      alert('Device does not support "SpeechRecognition" or webkitSpeechRecognition"');
       return;
     }
     console.log('translateFrom', this.state.translateFrom);
     console.log('translateTo', this.state.translateTo);
 
-    const recognition = new window.webkitSpeechRecognition();
+    const recognition = new SpeechRecognition();
     recognition.interimResults = true;
     recognition.lang = this.state.translateFrom.code;
 
