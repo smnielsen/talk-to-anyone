@@ -191,8 +191,7 @@ class App extends Component {
         }
         // Reset
         this.setState({
-          listening: false,
-          error: null
+          listening: false
         });
 
         // Speak it!
@@ -200,12 +199,12 @@ class App extends Component {
       }, 1000);
     };
 
-    recognition.onerror = (event) => {
-      console.log(`onerror: ${event}`);
-      alert(`"webkitSpeechRecognition" got error: ${event.message}`, event);
+    recognition.onerror = (error) => {
+      console.log(`onerror: ${error.error}`, error);
+      alert(`"webkitSpeechRecognition" got error: ${error.message}.\n\n${JSON.stringify(error)}`);
       this.setState({
         listening: false,
-        error: new Error(event)
+        error
       })
     }
 
@@ -361,6 +360,14 @@ class App extends Component {
           <Subtitle>Powered by Yandex.Translate <a href="http://translate.yandex.com/">http://translate.yandex.com/</a></Subtitle>
           </Center>
         </Container>
+        {
+          this.state.error
+            ? (<div>
+                <h4>Error trace</h4>
+                {JSON.stringify(this.state.error)}
+              </div>)
+            : null
+        }
       </Wrapper>
     );
   }
