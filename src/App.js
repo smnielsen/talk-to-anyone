@@ -338,6 +338,7 @@ class App extends Component {
                   : <MicrophoneStyled />
               }
             </StyledButton>
+            <Subtitle>Voices #: {speechSynthesis.getVoices().length}</Subtitle>
           </Center>
           <Center>
             {this.state.translateTo.name} <EmojiPointer emojiType="down" />
