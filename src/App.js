@@ -139,12 +139,12 @@ const speak = (text, lang) => {
   window.speechSynthesis.speak(msg);
 }
 const initialState = {
-  speechText: '',
-  translated: '',
+  speechText: 'What you say',
+  translated: 'What translations said',
   error: null,
   listening: false,
-  fallbackEng: '',
-  fallbackSwe: ''
+  fallbackEng: 'What you said in English',
+  fallbackSwe: 'What you said in Swedish'
 };
 
 class App extends Component {

@@ -12,8 +12,15 @@
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff",
-  "permissions": [
-    "audio",
-    "audioCapture"
-  ]
+  "permissions": {
+    "audio-capture" : {
+      "description" : "Audio capture"
+    },
+    "speech-recognition" : {
+      "description" : "Speech recognition"
+    },
+    "audio" : {
+      "description" : "Audio play"
+    }
+  }
 }
