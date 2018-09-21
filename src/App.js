@@ -40,18 +40,18 @@ const SpeechText = styled.div`
   padding: 5px;
   margin: 5px;
   font-size: 16px;
-  color: black;
+  color: grey;
+  font-weight: bold;
 `
 
 const GreenResult = styled(SpeechText)`
   color: green;
-  font-weight: bold;
   text-align: center;
   font-size: 34px;
 `
 
-const GreyResult = styled(SpeechText)`
-  color: grey;
+const DarkGreenResult = styled(SpeechText)`
+  color: darkgreen;
 `
 
 const Subtitle = styled.div`
@@ -308,11 +308,11 @@ class App extends Component {
           <Separator />
           <Center>
             English <EmojiPointer direction="down" />
-            <GreyResult>{this.state.fallbackEng || '...'}</GreyResult>
+            <DarkGreenResult>{this.state.fallbackEng || '...'}</DarkGreenResult>
           </Center>
           <Center>
             Swedish <EmojiPointer direction="down" />
-            <GreyResult>{this.state.fallbackSwe || '...'}</GreyResult>
+            <DarkGreenResult>{this.state.fallbackSwe || '...'}</DarkGreenResult>
           </Center>
           <Separator />
           <Center>
