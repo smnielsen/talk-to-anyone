@@ -12,10 +12,11 @@ const SpeakerPhoneSmall = styled(SpeakerPhone)`
 `
 
 const StyledButton = styled.button`
-  margin: 20px auto; 
+  margin: 5px auto; 
   background: palevioletred;
   border-radius: 3px;
   padding: 40px 80px;
+  width: 100%;
   font-size: 20px;
   border: none;
   color: white;
@@ -43,8 +44,7 @@ const Label = styled.div`
 
 const SpeechText = styled.div`
   padding: 5px;
-  margin: 5px;
-  font-size: 16px;
+  font-size: 12px;
   color: grey;
   font-weight: bold;
 `
@@ -57,6 +57,7 @@ const GreenResult = styled(SpeechText)`
 
 const DarkGreenResult = styled(SpeechText)`
   color: darkgreen;
+  display: inline-block;
 `
 
 const Subtitle = styled.div`
@@ -81,13 +82,16 @@ const MicrophoneListening = styled(MicrophoneStyled)`
 `
 
 const Wrapper = styled.section`
-  padding: 4em;
   background: papayawhip;
   text-align: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 `
 
 const Container = styled.section`
-  width: 500px;
   margin: 0 auto;
   padding: 10px;
   text-align: left;
@@ -141,19 +145,21 @@ const initialState = {
   error: null,
   listening: false,
   fallbackEng: '',
-  fallbackSwe: '',
-  translateFrom: {
-    name: 'Svenska', // 'Pусский',
-    code: 'sv-SE' // 'ru-RU'
-  },
-  translateTo: {
-    name: 'Deutsch',
-    code: 'de-DE'
-  }
+  fallbackSwe: ''
 };
 
 class App extends Component {
-  state = initialState
+  state = {
+    ...initialState,
+    translateFrom: {
+      name: 'Svenska', // 'Pусский',
+      code: 'sv-SE' // 'ru-RU'
+    },
+    translateTo: {
+      name: 'Deutsch',
+      code: 'de-DE'
+    }
+  }
 
   componentDidMount() {
     if (!('webkitSpeechRecognition' in window)) {
@@ -267,6 +273,7 @@ class App extends Component {
     const langCode = getLanguageCodes(langName)[0];
 
     this.setState({
+      ...initialState,
       translateTo: {
         name: langName,
         code: langCode
@@ -281,6 +288,7 @@ class App extends Component {
     const langCode = getLanguageCodes(langName)[0];
 
     this.setState({
+      ...initialState,
       translateFrom: {
         name: langName,
         code: langCode
@@ -314,7 +322,6 @@ class App extends Component {
     return (
       <Wrapper>
         <h1>TalkToAnyone</h1>
-        <Subtitle>Talk and it will do the rest for you...</Subtitle>
         <Container>
           {this.renderSelect("Translate from", this.state.translateFrom, this.onTranslateFromChange.bind(this))}
           {this.renderSelect("Translate to", this.state.translateTo, this.onTranslateToChange.bind(this))}
@@ -337,14 +344,14 @@ class App extends Component {
           </Center>
           <Separator />
           <Center>
-            English <EmojiPointer emojiType="down" /> 
+            English <EmojiPointer emojiType="right" /> 
             <DarkGreenResult>
             {this.state.fallbackEng || '...'}
             <SpeakerPhoneSmall onClick={() => speak(this.state.fallbackEng, 'en-US')} />
             </DarkGreenResult>
           </Center>
           <Center>
-            Swedish <EmojiPointer emojiType="down" />
+            Swedish <EmojiPointer emojiType="right" />
             <DarkGreenResult>
               {this.state.fallbackSwe || '...'}
               <SpeakerPhoneSmall onClick={() => speak(this.state.fallbackSwe, 'sv-SE')} />
